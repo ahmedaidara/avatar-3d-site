@@ -76,6 +76,13 @@
       padding: 10px 18px;
       font-size: 0.95rem;
     }
+    .speed-control {
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
     footer { margin-top: 40px; font-size: 0.9rem; color: #888; }
     @media (max-width: 600px) {
       model-viewer { height: 450px; }
@@ -92,7 +99,6 @@
       id="avatar"
       src="https://ahmedaidara.github.io/avatar-3d-site/ton-avatar.glb" 
       alt="Avatar 3D d'Ahmed"
-      auto-rotate 
       camera-controls 
       shadow-intensity="1"
       exposure="1"
@@ -107,8 +113,7 @@
     </model-viewer>
 
     <div class="info">
-      <h2>Mon avatar</h2>
-      <p>Tourne, zoome et regarde-moi sous tous les angles.</p>
+      <h2>Contrôles</h2>
       
       <div class="controls">
         <button onclick="document.getElementById('avatar').cameraOrbit = '0deg 75deg 2.5m'">Face</button>
@@ -117,8 +122,14 @@
         <button onclick="document.getElementById('avatar').resetTurntableRotation()">Reset caméra</button>
       </div>
 
+      <div class="speed-control">
+        <span>Vitesse :</span>
+        <input type="range" id="speed" min="0.2" max="2" step="0.1" value="1">
+        <span id="speedValue">1.0x</span>
+      </div>
+
       <div id="animations">
-        <!-- Les boutons d'animations seront ajoutés automatiquement ici -->
+        <p style="color:#aaa;">Chargement des animations...</p>
       </div>
     </div>
 
@@ -130,33 +141,59 @@
   <script>
     const viewer = document.querySelector('#avatar');
     const animContainer = document.getElementById('animations');
+    const speedSlider = document.getElementById('speed');
+    const speedValue = document.getElementById('speedValue');
+
+    speedSlider.addEventListener('input', () => {
+      const val = parseFloat(speedSlider.value);
+      speedValue.textContent = val.toFixed(1) + 'x';
+      if (viewer.animationName) {
+        viewer.timeScale = val;
+      }
+    });
 
     viewer.addEventListener('load', () => {
       console.log('Avatar chargé');
 
       const animations = viewer.availableAnimations || [];
-      
+      animContainer.innerHTML = '';
+
       if (animations.length === 0) {
-        animContainer.innerHTML = '<p style="color:#aaa; margin-top:10px;">Aucune animation trouvée dans le fichier GLB.</p>';
+        animContainer.innerHTML = '<p style="color:#ff6b6b;">Aucune animation trouvée dans le GLB.</p>';
         return;
       }
 
       // Bouton Stop
       const stopBtn = document.createElement('button');
-      stopBtn.textContent = 'Stop';
+      stopBtn.textContent = '⏹ Stop';
       stopBtn.onclick = () => {
         viewer.pause();
-        viewer.animationName = null;
       };
       animContainer.appendChild(stopBtn);
 
-      // Un bouton par animation
+      // Bouton Play / Pause
+      const playPauseBtn = document.createElement('button');
+      playPauseBtn.textContent = '▶ Play';
+      playPauseBtn.onclick = () => {
+        if (viewer.paused) {
+          viewer.play();
+          playPauseBtn.textContent = '⏸ Pause';
+        } else {
+          viewer.pause();
+          playPauseBtn.textContent = '▶ Play';
+        }
+      };
+      animContainer.appendChild(playPauseBtn);
+
+      // Un bouton pour chaque animation
       animations.forEach(name => {
         const btn = document.createElement('button');
         btn.textContent = name;
         btn.onclick = () => {
           viewer.animationName = name;
+          viewer.timeScale = parseFloat(speedSlider.value);
           viewer.play();
+          playPauseBtn.textContent = '⏸ Pause';
         };
         animContainer.appendChild(btn);
       });
