@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avatars Duo | Ahmed</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #ffffff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      background: linear-gradient(to right, #00d4ff, #7b2cbf);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .viewers {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    .viewer-box {
+      flex: 1;
+      min-width: 300px;
+      max-width: 500px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .viewer-box h2 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #00d4ff;
+    }
+    model-viewer {
+      width: 100%;
+      height: 500px;
+      background: transparent;
+    }
+    .controls {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    button {
+      background: linear-gradient(45deg, #7b2cbf, #00d4ff);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    button:hover { opacity: 0.9; }
+    .note {
+      text-align: center;
+      color: #aaa;
+      margin-top: 20px;
+      font-size: 0.95rem;
+    }
+    @media (max-width: 700px) {
+      .viewers { flex-direction: column; }
+      model-viewer { height: 400px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Avatars Duo</h1>
+
+  <div class="viewers">
+    <!-- Homme -->
+    <div class="viewer-box">
+      <h2>Homme</h2>
+      <model-viewer 
+        id="homme"
+        src="ton-avatar.glb" 
+        alt="Avatar homme"
+        camera-controls 
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        crossorigin="anonymous">
+      </model-viewer>
+      <div class="controls" id="controls-homme"></div>
+    </div>
+
+    <!-- Femme -->
+    <div class="viewer-box">
+      <h2>Femme</h2>
+      <model-viewer 
+        id="femme"
+        src="femme.glb" 
+        alt="Avatar femme"
+        camera-controls 
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1"
+        crossorigin="anonymous">
+      </model-viewer>
+      <div class="controls" id="controls-femme"></div>
+    </div>
+  </div>
+
+  <p class="note">
+    Place le fichier de la fille sous le nom <strong>femme.glb</strong> dans le dépôt.<br>
+    Les boutons d’animations apparaissent automatiquement.
+  </p>
+
+  <script>
+    function setupViewer(id, controlsId) {
+      const viewer = document.getElementById(id);
+      const container = document.getElementById(controlsId);
+
+      viewer.addEventListener('load', () => {
+        const animations = viewer.availableAnimations || [];
+        container.innerHTML = '';
+
+        if (animations.length === 0) {
+          container.innerHTML = '<p style="color:#aaa; font-size:0.9rem;">Pas d\'animations</p>';
+          return;
+        }
+
+        const stop = document.createElement('button');
+        stop.textContent = 'Stop';
+        stop.onclick = () => viewer.pause();
+        container.appendChild(stop);
+
+        animations.forEach(name => {
+          const btn = document.createElement('button');
+          btn.textContent = name;
+          btn.onclick = () => {
+            viewer.animationName = name;
+            viewer.play();
+          };
+          container.appendChild(btn);
+        });
+      });
+
+      viewer.addEventListener('error', () => {
+        container.innerHTML = '<p style="color:#ff6b6b;">Fichier non trouvé</p>';
+      });
+    }
+
+    setupViewer('homme', 'controls-homme');
+    setupViewer('femme', 'controls-femme');
+  </script>
+</body>
+</html>
